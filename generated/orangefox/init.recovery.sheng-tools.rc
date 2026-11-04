@@ -1,0 +1,4 @@
+# Generated device-local language overlay; no partition writes.
+on init
+    copy /system/etc/sheng-device-languages/es-ES.xml /twres/languages/es-ES.xml
+    copy /system/etc/sheng-device-languages/hu.xml /twres/languages/hu.xml

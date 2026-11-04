@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: Apache-2.0
+soong_namespace {
+    imports: ["hardware/qcom-caf/bootctrl"],
+}
+
+cc_binary {
+    name: "sheng-avb",
+    licenses: ["sheng-avb-orangefox-license"],
+    srcs: ["src/sheng_avb.cpp"],
+    recovery: true,
+    static_executable: true,
+    stl: "libc++_static",
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}
+
+license {
+    name: "sheng-avb-orangefox-license",
+    license_kinds: ["SPDX-license-identifier-GPL-3.0-or-later"],
+    license_text: ["src/ORANGEFOX-NOTICE"],
+}
+
+cc_binary_host {
+    name: "sheng-vintf-check",
+    srcs: ["tools/vintf_transport_check.cpp"],
+    shared_libs: ["libvintf"],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}
+
+// Build the upstream QTI implementation against this recovery's framework.
+// GPT/UFS helper provenance and original licenses are in gpt-utils/README.md.
+cc_library {
+    name: "bootctrl.kalama",
+    defaults: ["bootctrl_hal_defaults"],
+    static_libs: ["libgptutils.sheng"],
+}
+
+cc_library_shared {
+    name: "android.hardware.boot@1.2-impl-qti",
+    stem: "android.hardware.boot@1.0-impl-1.2-qti",
+    defaults: ["android.hardware.boot@1.2-impl-qti_defaults"],
+    static_libs: ["libgptutils.sheng"],
+}

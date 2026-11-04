@@ -1,0 +1,56 @@
+{
+  "platform": {
+    "manifest_url": "https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git",
+    "manifest_commit": "6dc117d9cbd08430daa16db2013560e1c4017fa8",
+    "aosp_tag": "android-12.1.0_r4",
+    "note": "Validation uses a shared AOSP platform; separate frontend checkouts and separate output directories. OrangeFox platform hooks are guarded with NOT_ORANGEFOX for TWRP."
+  },
+  "orangefox": {
+    "url": "https://gitlab.com/OrangeFox/bootable/Recovery.git",
+    "branch": "fox_12.1",
+    "commit": "6bd902d14f754ab98a7cccc5598f7b9d135cfc38"
+  },
+  "twrp": {
+    "url": "https://github.com/TeamWin/android_bootable_recovery.git",
+    "branch": "android-12.1",
+    "commit": "5c3d206a5eeb3d446bcda8248a405a4b278bab5c"
+  },
+  "vendor_twrp": {
+    "url": "https://github.com/TeamWin/android_vendor_twrp",
+    "commit": "664ac3aa7a569d28d902734c741a629a59bab32d"
+  },
+  "qcom_twrp_common": {
+    "url": "https://github.com/TeamWin/android_device_qcom_twrp-common",
+    "commit": "98506f7919102378c8d52ee7d6a94a867f1b4c55",
+    "used_file": "crypto/system/bin/prepdecrypt.sh"
+  },
+  "device_configuration_source": "Rewritten hardware configuration with blobs from official OS3.0.303.0.WNXCNXM; standalone v2 boot addresses and first-stage module layout reference map220v sheng",
+  "boot_layout_reference": {
+    "url": "https://github.com/map220v/android_device_xiaomi_sheng.git",
+    "commit": "a9a2994997fa3574b6e718561b5d1c884661b89e",
+    "used": "v2 load addresses and /lib/modules first-stage loading approach; no reference kernel or module binaries copied"
+  },
+  "qti_bootcontrol": {
+    "source": "hardware/qcom-caf/bootctrl in the pinned source platform",
+    "commit": "9ed7376299a15399624ebff4fcf8b8a162cd6c34",
+    "used": "QTI BootControl HAL source defaults, rebuilt for the recovery framework"
+  },
+  "gpt_ufs_support": {
+    "url": "https://github.com/map220v/android_device_xiaomi_sheng.git",
+    "commit": "a9a2994997fa3574b6e718561b5d1c884661b89e",
+    "used": "gpt-utils source files with original licenses; local build module renamed libgptutils.sheng"
+  },
+  "upstream_changes": "tools/apply-platform-fixes.py",
+  "twrp_avb_port": {
+    "url": "https://gitlab.com/OrangeFox/bootable/Recovery.git",
+    "commit": "6bd902d14f754ab98a7cccc5598f7b9d135cfc38",
+    "file": "partitionmanager.cpp",
+    "functions": [
+      "Do_Disable_AVB2",
+      "TWPartitionManager::Disable_AVB2 (AB_OTA_UPDATER branch)"
+    ],
+    "license": "GPL-3.0-or-later",
+    "local_file": "src/sheng_avb.cpp",
+    "adaptation": "Standalone stdio/exit-code glue in device tree; same AVB0 check, byte 123 set to 2, all four A/B targets, and native partial-failure aggregation. No backup or metadata operations."
+  }
+}

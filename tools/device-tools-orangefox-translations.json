@@ -1,0 +1,20 @@
+{
+  "es-ES": {
+    "auto_disable_avb2": "Desactivar AVB 2.0 de vbmeta tras instalar la ROM",
+    "disable_avb2": "Desactivar AVB 2.0 de vbmeta",
+    "disable_avb2_confirm": "¿Desactivar AVB 2.0 de vbmeta?",
+    "disabling_AVB2": "Desactivando AVB 2.0 de vbmeta...",
+    "disabling_AVB2_complete": "AVB 2.0 de vbmeta desactivado",
+    "disable_avb2_success_msg": "AVB 2.0: '{1}' se ha procesado correctamente.",
+    "disable_avb2_fail_msg": "AVB 2.0: no se ha podido procesar '{1}'."
+  },
+  "hu": {
+    "auto_disable_avb2": "vbmeta AVB 2.0 kikapcsolása a ROM telepítése után",
+    "disable_avb2": "vbmeta AVB 2.0 kikapcsolása",
+    "disable_avb2_confirm": "Kikapcsolja a vbmeta AVB 2.0 ellenőrzését?",
+    "disabling_AVB2": "vbmeta AVB 2.0 kikapcsolása...",
+    "disabling_AVB2_complete": "vbmeta AVB 2.0 kikapcsolva",
+    "disable_avb2_success_msg": "AVB 2.0: '{1}' feldolgozása sikerült.",
+    "disable_avb2_fail_msg": "AVB 2.0: '{1}' feldolgozása sikertelen."
+  }
+}

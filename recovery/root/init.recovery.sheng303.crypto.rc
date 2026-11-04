@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: Apache-2.0
+on property:ro.crypto.state=encrypted && property:ro.crypto.type=file
+    install_keyring
+    start sheng303-prepdecrypt
+
+on property:crypto.ready=1 && property:hwservicemanager.ready=true
+    start sheng303-qseecomd
+
+on property:vendor.sys.listeners.registered=true
+    start sheng303-keymint
+    start sheng303-gatekeeper
+    start keystore2
+
+on property:sys.listeners.registered=true
+    start sheng303-keymint
+    start sheng303-gatekeeper
+    start keystore2
+
+service sheng303-prepdecrypt /system/bin/sh /system/bin/prepdecrypt.sh
+    user root
+    group root system
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
+
+service sheng303-qseecomd /system/bin/sh /system/bin/sheng303-run /vendor/bin/qseecomd
+    socket notify-topology stream 660 system drmrpc
+    user root
+    group root system drmrpc readproc log
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
+
+service sheng303-keymint /system/bin/sh /system/bin/sheng303-run /vendor/bin/hw/android.hardware.security.keymint-service-qti
+    interface aidl android.hardware.security.keymint.IKeyMintDevice/default
+    interface aidl android.hardware.security.keymint.IRemotelyProvisionedComponent/default
+    interface aidl android.hardware.security.sharedsecret.ISharedSecret/default
+    interface aidl android.hardware.security.secureclock.ISecureClock/default
+    user root
+    group root system drmrpc
+    disabled
+    seclabel u:r:recovery:s0
+
+service sheng303-gatekeeper /system/bin/sh /system/bin/sheng303-run /vendor/bin/hw/android.hardware.gatekeeper@1.0-service-qti
+    interface android.hardware.gatekeeper@1.0::IGatekeeper default
+    user root
+    group root system drmrpc
+    disabled
+    seclabel u:r:recovery:s0

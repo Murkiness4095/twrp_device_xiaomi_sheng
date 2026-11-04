@@ -1,0 +1,25 @@
+# Generated device-local language overlay; no partition writes.
+on init
+    copy /system/etc/sheng-device-languages/cz.xml /twres/languages/cz.xml
+    copy /system/etc/sheng-device-languages/de.xml /twres/languages/de.xml
+    copy /system/etc/sheng-device-languages/el.xml /twres/languages/el.xml
+    copy /system/etc/sheng-device-languages/en.xml /twres/languages/en.xml
+    copy /system/etc/sheng-device-languages/es.xml /twres/languages/es.xml
+    copy /system/etc/sheng-device-languages/fr.xml /twres/languages/fr.xml
+    copy /system/etc/sheng-device-languages/hu.xml /twres/languages/hu.xml
+    copy /system/etc/sheng-device-languages/id.xml /twres/languages/id.xml
+    copy /system/etc/sheng-device-languages/it.xml /twres/languages/it.xml
+    copy /system/etc/sheng-device-languages/ja.xml /twres/languages/ja.xml
+    copy /system/etc/sheng-device-languages/lk.xml /twres/languages/lk.xml
+    copy /system/etc/sheng-device-languages/nl.xml /twres/languages/nl.xml
+    copy /system/etc/sheng-device-languages/pl.xml /twres/languages/pl.xml
+    copy /system/etc/sheng-device-languages/pt_BR.xml /twres/languages/pt_BR.xml
+    copy /system/etc/sheng-device-languages/pt_PT.xml /twres/languages/pt_PT.xml
+    copy /system/etc/sheng-device-languages/ru.xml /twres/languages/ru.xml
+    copy /system/etc/sheng-device-languages/sk.xml /twres/languages/sk.xml
+    copy /system/etc/sheng-device-languages/sl.xml /twres/languages/sl.xml
+    copy /system/etc/sheng-device-languages/sv.xml /twres/languages/sv.xml
+    copy /system/etc/sheng-device-languages/tr.xml /twres/languages/tr.xml
+    copy /system/etc/sheng-device-languages/uk.xml /twres/languages/uk.xml
+    copy /system/etc/sheng-device-languages/zh_CN.xml /twres/languages/zh_CN.xml
+    copy /system/etc/sheng-device-languages/zh_TW.xml /twres/languages/zh_TW.xml

@@ -1,0 +1,27 @@
+Device configuration and integration helpers authored for sheng / 24018RPACC.
+Copyright 2026 Dev裴月笙.
+New configuration and helper source files are licensed under Apache-2.0.
+The standalone v2 boot-address configuration follows map220v's sheng tree,
+commit a9a2994997fa3574b6e718561b5d1c884661b89e, whose configuration carries
+Copyright (C) 2023 The Android Open Source Project, Apache-2.0.
+
+This license grant does not relicense the extracted stock binaries, firmware,
+kernel image, device trees, kernel modules, Android runtime, or vendor libraries.
+Those files retain their respective owners' licenses and notices. Their exact
+stock origins and SHA-256 hashes are listed in stock303-manifest.json.
+
+Recovery and the Android build system remain the work of OrangeFox, TeamWin,
+AOSP and their contributors. The qcom prepdecrypt helper remains an upstream
+dependency with its own copyright. See upstream-revisions.json for the pinned
+repositories used for offline validation.
+
+Device-local tool menus (2026-11-04):
+- generated/twrp/ui.xml and copied language XML derive from TeamWin's pinned
+  android_bootable_recovery 5c3d206a5eeb3d446bcda8248a405a4b278bab5c.
+  Their upstream rights/licenses are retained; the Apache-2.0 license for new
+  device integration code does not relicense these upstream theme resources.
+- src/sheng_avb.cpp ports OrangeFox partitionmanager.cpp AVB functions from
+  commit 6bd902d14f754ab98a7cccc5598f7b9d135cfc38, Copyright TeamWin and
+  OrangeFox Recovery Project, GPL-3.0-or-later. src/ORANGEFOX-NOTICE contains
+  the original notice and license. It is not licensed under Apache-2.0.
+- OrangeFox AVB behavior uses its existing native implementation unchanged.

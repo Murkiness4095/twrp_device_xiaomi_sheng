@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0
+import /init.recovery.sheng-tools.rc
+
+on init
+    write /sys/fs/selinux/enforce 0
+    # Both frontends create /odm, but TWRP also populates default child links.
+    # A bind mount handles either layout without deleting or replacing it.
+    mount none /vendor/odm /odm bind
+
+on fs
+    symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
+    # Warm the declared service before recovery/fastbootd first requests it.
+    # Keep its upstream implementation and init service definition unchanged.
+    start boot-hal-1-2
+    start sheng303-hardware
+    start sheng303-touch
+
+on boot
+    setprop sys.usb.config adb
+
+on property:sys.sheng303.hardware.ready=1
+    # The upstream recovery service is packaged but disabled by default.
+    start health-hal-2-1
+
+service sheng303-hardware /system/bin/sh /system/bin/sheng303-hardware
+    user root
+    group root system drmrpc input
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
+
+service sheng303-touch /system/bin/sh /system/bin/sheng303-touch
+    user root
+    group root input system
+    disabled
+    restart_period 5
+    capabilities SYS_NICE
+    seclabel u:r:recovery:s0

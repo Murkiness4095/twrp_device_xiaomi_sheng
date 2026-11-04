@@ -1,0 +1,133 @@
+{
+  "version": "30.7",
+  "version_code": 30700,
+  "official_release": "https://github.com/topjohnwu/Magisk/releases/tag/v30.7",
+  "official_apk_url": "https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk",
+  "official_apk_sha256": "e0d32d2123532860f97123d927b1bb86c4e08e6fd8a48bfc6b5bee0afae9ebd5",
+  "recovery_zip_sha256": "6c9d40e31959159ac152c7286a3099299af357eaedc8ad9be66fe228d7a8e683",
+  "recovery_zip_bytes": 2641151,
+  "component_bytes_unmodified": true,
+  "selection": "All official assets and recovery scripts, ARM64 libraries, optional ARM32 magisk binary",
+  "entries": [
+    {
+      "path": "META-INF/com/google/android/update-binary",
+      "sha256": "0bb9dba69f2eae3a179de84fe7ae254733da9d0fc8862cbbfdf7da9b730fa53c",
+      "bytes": 791
+    },
+    {
+      "path": "META-INF/com/google/android/updater-script",
+      "sha256": "e7e1a9577ea4f49d0f8005fdf8c4d5a71e606efaba9ed4f03444f32b44c317b6",
+      "bytes": 2163
+    },
+    {
+      "path": "assets/PublicSuffixDatabase.list",
+      "sha256": "c75ab827afd7ffff59a51b14729c25dbfc3b45237eb40ccf02bec7b7d44304a4",
+      "bytes": 132737
+    },
+    {
+      "path": "assets/addon.d.sh",
+      "sha256": "ab56d64e7d846defb99342be68be063c9471fc88b9245b51ce6f7ea24ff47024",
+      "bytes": 4095
+    },
+    {
+      "path": "assets/app_functions.sh",
+      "sha256": "6c0acfadcfca72dcdc1a6bd37874ef0ef10ff793a19ead34a4b77e5b2ca13f0b",
+      "bytes": 5518
+    },
+    {
+      "path": "assets/boot_patch.sh",
+      "sha256": "20de7208d610a267aaafafe09846c4458a240ba51656d05252fc1c9c7e7ada8f",
+      "bytes": 7197
+    },
+    {
+      "path": "assets/bootctl",
+      "sha256": "36b977ecf13424091f3c8c6bb47e98bd318d7908e2070e417efe81a6460cdef6",
+      "bytes": 154248
+    },
+    {
+      "path": "assets/chromeos/futility",
+      "sha256": "2b18aabff02b5daf5b7efec3d33bfffb8721ba7bf24fde5882db7f61020e4e45",
+      "bytes": 548140
+    },
+    {
+      "path": "assets/chromeos/kernel.keyblock",
+      "sha256": "4e708c9ec43ac4a5d718474c9431ba6b6da3e64a9dda6afd2853a9e9e3079ffb",
+      "bytes": 1208
+    },
+    {
+      "path": "assets/chromeos/kernel_data_key.vbprivk",
+      "sha256": "bc9e707a86e55a93f423e7bcdae4a25fd470b868e53829b91bbe2ccfbc6da27b",
+      "bytes": 1199
+    },
+    {
+      "path": "assets/dexopt/baseline.prof",
+      "sha256": "51e3b0e783b04e0de6f75126c184340512f4188592720aa356d8f14c00de1e65",
+      "bytes": 3987
+    },
+    {
+      "path": "assets/dexopt/baseline.profm",
+      "sha256": "1dd76d8b111f0bc677223a3183cf0f30b789d7fc78f59b54c1ac0171055667ab",
+      "bytes": 497
+    },
+    {
+      "path": "assets/main.jar",
+      "sha256": "ae7fdb8b70bd2c1cc2c27043e985f8dc5cfff2cb9142a1576dcdbc889763ef7b",
+      "bytes": 3656
+    },
+    {
+      "path": "assets/module_installer.sh",
+      "sha256": "bcf4b1d9913f3af17755569c853e0b5a75b8005f6a18eb3f86dadcc0e968c29d",
+      "bytes": 612
+    },
+    {
+      "path": "assets/stub.apk",
+      "sha256": "f0230e0864be255d963befa929ae1c0bb85c4df3e3578bb6cecc3049b6881eb0",
+      "bytes": 70013
+    },
+    {
+      "path": "assets/uninstaller.sh",
+      "sha256": "74cabed92170d5871eb39d66355deee984c5bd2a3ce4d7b98c069c8e39144109",
+      "bytes": 4762
+    },
+    {
+      "path": "assets/util_functions.sh",
+      "sha256": "efe385ffdb72c7fc9b5bcef4267acc4f68ad73b2ac02bb577328f77ea66643eb",
+      "bytes": 20418
+    },
+    {
+      "path": "lib/arm64-v8a/libbusybox.so",
+      "sha256": "4d60ab3f5a59ebb2ca863f2f514e6924401b581e9b64f602665c008177626651",
+      "bytes": 1710600
+    },
+    {
+      "path": "lib/arm64-v8a/libinit-ld.so",
+      "sha256": "c71e69780bb7ce6d6c26b2d794a3c631689bed130519762716fee285a10417f0",
+      "bytes": 5208
+    },
+    {
+      "path": "lib/arm64-v8a/libmagisk.so",
+      "sha256": "2d8419018dda41f7d9aca94c0ca8f926f3b8447ca5cf7fb71faeb8d05e29694e",
+      "bytes": 394232
+    },
+    {
+      "path": "lib/arm64-v8a/libmagiskboot.so",
+      "sha256": "d7440e2cd89899426e809554bf793baef9804ccbe5a52ce34a8b6242725d3c77",
+      "bytes": 788840
+    },
+    {
+      "path": "lib/arm64-v8a/libmagiskinit.so",
+      "sha256": "383670a7ba3a6a4b79e5f3467e1da4b66a5df66a9b356ab9f70916854dd6b468",
+      "bytes": 199960
+    },
+    {
+      "path": "lib/arm64-v8a/libmagiskpolicy.so",
+      "sha256": "9837db9db475eb74b6715f081768cb6a1f2fb5a2b2ac15755686062501bace27",
+      "bytes": 356584
+    },
+    {
+      "path": "lib/armeabi-v7a/libmagisk.so",
+      "sha256": "750da5f48869be0dd90ed268e06ae5c324008b3342fba0e501f52ec0ce8e3b32",
+      "bytes": 256808
+    }
+  ]
+}

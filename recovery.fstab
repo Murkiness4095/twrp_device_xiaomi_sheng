@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+# Derived from the official 303 vendor_boot first-stage fstab, not another tree.
+system /system erofs ro wait,logical,slotselect
+system_ext /system_ext erofs ro wait,logical,slotselect
+product /product erofs ro wait,logical,slotselect
+vendor /vendor erofs ro wait,logical,slotselect
+odm /odm erofs ro wait,logical,slotselect
+vendor_dlkm /vendor_dlkm erofs ro wait,logical,slotselect
+system_dlkm /system_dlkm erofs ro wait,logical,slotselect
+mi_ext /mi_ext erofs ro wait,logical,slotselect,nofail
+/dev/block/by-name/metadata /metadata f2fs noatime,nosuid,nodev,discard wait,check,formattable
+/dev/block/by-name/userdata /data f2fs noatime,nosuid,nodev,discard,reserve_root=32768,resgid=1065,fsync_mode=nobarrier,inlinecrypt,gc_merge latemount,wait,check,formattable,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0,keydirectory=/metadata/vold/metadata_encryption,metadata_encryption=aes-256-xts:wrappedkey_v0,quota,reservedsize=128M
+/dev/block/by-name/boot /boot emmc defaults slotselect,flashimg=1
+/dev/block/by-name/init_boot /init_boot emmc defaults slotselect,flashimg=1
+/dev/block/by-name/vendor_boot /vendor_boot emmc defaults slotselect,flashimg=1
+/dev/block/by-name/recovery /recovery emmc defaults slotselect,flashimg=1
+/dev/block/by-name/dtbo /dtbo emmc defaults slotselect,flashimg=1
+/dev/block/by-name/vbmeta /vbmeta emmc defaults slotselect,flashimg=1
+/dev/block/by-name/vbmeta_system /vbmeta_system emmc defaults slotselect,flashimg=1
+/dev/block/by-name/misc /misc emmc defaults defaults
+/dev/block/by-name/persist /persist ext4 ro,nosuid,nodev,noatime wait
+/dev/block/by-name/rescue /cache ext4 nosuid,nodev,noatime wait
