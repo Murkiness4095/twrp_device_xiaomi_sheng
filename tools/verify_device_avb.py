@@ -54,14 +54,22 @@ with tempfile.TemporaryDirectory(prefix='sheng-orangefox-avb-') as folder:
   if case=='short-valid':target.write_bytes(target.read_bytes()[:124])
   if case=='missing':target.unlink()
   if case=='empty':target.write_bytes(b'')
-  paths=[];results=[]
+  paths=[];results=[];outputs=[]
   for binary in (ref,port):
    destination=temp/(case+'-'+binary.name);shutil.copytree(source,destination);paths.append(destination)
-   results.append(subprocess.run([str(binary),'--disable','--device-dir',str(destination)],capture_output=True).returncode)
+   process=subprocess.run([str(binary),'--disable','--device-dir',str(destination)],capture_output=True,text=True)
+   results.append(process.returncode);outputs.append(process.stdout)
   assert results[0]==results[1],(case,results)
   assert {p.name:p.read_bytes() for p in paths[0].iterdir()}=={p.name:p.read_bytes() for p in paths[1].iterdir()},case
   assert sorted(p.name for p in paths[1].iterdir())==sorted(p.name for p in source.iterdir())
   checks[case+'_matches_upstream']=True
+  messages=json.loads((root/'tools/device-avb-messages.json').read_text())['en']
+  lines=outputs[1].splitlines()
+  assert len(lines)==6 and lines[0]==messages[0] and lines[-1]==messages[3 if results[1]==0 else 4],case
+  for name in names:
+   success=(paths[1]/name).is_file() and (paths[1]/name).read_bytes().startswith(b'AVB0') and len((paths[1]/name).read_bytes())>=124
+   assert messages[1 if success else 2].replace('{1}',name) in lines[1:-1],(case,name)
+  checks[case+'_visible_partition_results_and_summary']=True
   if case=='flags-3':
    for name in names:
     original=(source/name).read_bytes();actual=(paths[1]/name).read_bytes()
@@ -70,6 +78,14 @@ with tempfile.TemporaryDirectory(prefix='sheng-orangefox-avb-') as folder:
   if case=='bad-magic':
    assert (paths[1]/names[0]).read_bytes()[123]==2 and results[1]==1
    checks['native_partial_failure_semantics_preserved']=True
+ for language,messages in json.loads((root/'tools/device-avb-messages.json').read_text()).items():
+  destination=paths[1]
+  process=subprocess.run([str(port),'--disable','--device-dir',str(destination),'--language',language],capture_output=True,text=True)
+  assert process.returncode==1
+  lines=process.stdout.splitlines()
+  assert len(lines)==6 and lines[0]==messages[0] and lines[-1]==messages[4],language
+  assert messages[2].replace('{1}',names[1]) in lines and all(messages[1].replace('{1}',name) in lines for name in (names[0],names[2],names[3])),language
+  checks[language+'_localized_failure_output']=True
  report={'implementation':'OrangeFox native A/B port','upstream_commit':'6bd902d14f754ab98a7cccc5598f7b9d135cfc38','checks':checks,'all_passed':all(checks.values()),'backup_or_metadata_operations':False,'physical_partition_writes':False}
  print(json.dumps(report,indent=2))
  if args.report:args.report.write_text(json.dumps(report,indent=2)+'\n')

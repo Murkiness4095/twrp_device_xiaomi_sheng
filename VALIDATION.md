@@ -1,47 +1,33 @@
-# sheng — 设备树实用功能与 fastbootd 启动优化
+# 2026-11-04 20:45 修正版验证范围
 
-- TWRP 原有“高级”页新增“禁用 AVB 2.0 验证”和“安装 Magisk 30.7”。
-- TWRP AVB 默认处理 A/B 两槽的 vbmeta/vbmeta_system，滑动确认后才运行；
-  按 OrangeFox 原生实现检查 AVB0，将偏移 123 的字节设为 2。
-  不新增备份、回滚、metadata 挂载或额外 hashtree 标志。
-- OrangeFox 在原生位置开放原生 AVB 选项，运行时默认不勾选；Magisk 原有位置不变。
-- TWRP 23 种语言均有新增文字，OrangeFox 32 种语言原生 AVB 文字覆盖齐全。
-  设备 init 在界面启动前安装内存语言覆盖，解决 customlanguages 启动被清除的问题。
-- fastbootd 硬件初始化不再为 338 个模块反复启动 tr/grep。实机只读循环计时
-  从 4.88 秒降至 0.081 秒；电池轮询间隔从 1 秒缩为 0.1 秒，最长等待仍为 10 秒。
-- 新功能、主题生成、翻译、编译配置与启动脚本均在设备树内；两套前端源码
-  构建前后的 tracked diff 和文件状态一致。本次没有新增前端源码补丁。
+TWRP 禁用 AVB2.0 原先通过 cmd 执行，stdout 仅进入 recovery.log，屏幕无逐分区日志。
+现通过原生 terminalcommand 将开始、四个分区各自结果、最终汇总送入屏幕日志。
+原生 terminalcommand 不保留子进程退出码，设备树包装器将真实结果在输出结束前发布，
+专用确认/动作页在进入原生完成页前读回结果，失败不会误报成功。
+23 种语言均有日志文字。实际 TWRP terminalcommand 方法与包装器在临时文件上
+验证成功、部分失败和工具缺失；对照 OrangeFox 原生分区操作仍一致。
+未在物理分区执行本次 AVB 测试，新镜像屏幕显示仍待用户验证。
+用户提供的 2020 实机照片已确认六行操作日志显示，但仍有终端命令路径回显。
+本次树内 GUI 输出适配仅隐藏 AVB 包装器的命令行；保留完整操作结果及普通终端回显。
+使用默认 BasePartition 工厂和设备库接口，无前端源码编辑；最终 recovery 链接符号、
+专用链接参数及真实 terminalcommand 的成功/失败/工具缺失输出回归均检查。
 
-两前端构建、最终 IMG/ZIP 审计和资源入口检查通过。AVB 工具与实际 OrangeFox
-原生函数在临时文件上进行字节及返回值对照，覆盖标志值、损坏、短文件、缺少目标
-及原生部分失败行为，均一致；保留上游版权与 GPL-3.0-or-later 许可。
-本轮未执行设备上的 AVB 禁用或 Magisk 安装；新镜像冷启动、界面和完整 USB 枚举
-由用户实机测试。模块循环计时不等于完整 fastbootd 端口出现时间。
-此前 0110 版本的官方 payload.bin OTA 完整安装已由用户确认成功；本轮未重刷 OTA。
+1915 OrangeFox 已撤回：将 advanced 页内联到 ui.xml 导致页面先于字体、资源、
+样式和模板加载，Recovery 循环 SIGSEGV，Logo 闪烁。改为保持原 include 顺序，
+独立加载树内 sheng-advanced.xml。当前设备 RAM 替换后用户确认进入界面，
+Fox 插件首项可见。按钮最终名称按用户要求为“禁用 AVB2.0”。
 
-型号 24018RPACC。两套 IMG 内嵌同套 303 内核/DTB/DTBO/338 个模块，使用 Zstd
-ramdisk，保持 eng.peiyuesheng.sheng.20261103 和 peiyuesheng_sheng 标识。
-TWRP 保持横屏，两前端默认中文且允许切换语言；文件名没有自定义修订号。
+电池启动日志显示固件片段加载失败，随后重试留下重复 GLINK 注册 -17。
+删除重复启动，将只读 modem 固件挂到 /firmware，内核搜索路径设为
+/firmware/image，避免 /vendor 挂卸影响。电池节点未就绪时不伪报 ready。
+1940 实机冷启动已确认 ADSP running、电池 capacity=100、Health HAL 运行。
+该镜像因 QSEE 启动脚本仍等待旧路径而卡在解密初始化 Logo。
+RAM 中将 /vendor/firmware_mnt 链接到 /firmware 并启动 QSEE 后，
+密钥服务恢复、data 挂载继续，用户确认进入界面。
+现已修正启动器：等待独立挂载的真实固件文件，在执行 QSEE 前创建旧路径兼容链接。
+以上实机结果来自 1940 加 RAM 修正；本目录新镜像仍待用户独立冷启动测试。
 
-Implementation and reproduction details: DEVICE_TOOLS.md.
-
-## 后续 fastbootd 固定等待优化
-
-设备树 BoardConfig 使用 PRODUCT_ENFORCE_VINTF_MANIFEST_OVERRIDE := true，
-通过构建系统启用真实的 HIDL VINTF 校验。镜像实际打包的 libhidlbase 已确认
-不含旧版未强制校验路径的固定 sleep(1) 分支，消除三个顺序查询约 3 秒的强制等待。
-设备 init 在 fs 阶段提前启动原生 BootControl 服务，Health 仍等待真实电池节点。
-实际 libvintf 对 BootControl 1.0/1.1/1.2、Health 2.0/2.1、Gatekeeper 及四个
-AIDL 加密服务实例的查询通过；未实现的可选 Fastboot HAL 正确返回未声明。
-两套镜像检查通过，未修改前端/框架源码。此项不代表所有冷启动、USB 主机环境
-都已达到 1 秒；新镜像的实际连接耗时及解密等实机回归仍由用户测试。
-
-## 2026-11-04 电池启动重试与 Fox 插件手动 AVB
-
-用户确认在运行中的 OrangeFox 重启离线 ADSP 后电池节点恢复。
-设备树脚本加入最多五次 ADSP 启动尝试；失败间隔 0.2 秒，首次成功没有额外等待。
-电池节点未生成时不误报 hardware.ready。四种模拟启动情形检查通过。
-OrangeFox 设备树自定义主题在 Fox 插件加入手动禁用 AVB 的滑动确认，直接调用
-原生 disableAVB2。原设置页自动开关和全部原生语言保留。
-仅修改设备树；两个前端现有 tracked diff / status 与功能开发前记录一致。
-新镜像冷启动电池恢复和手动按钮仍待实机确认，不能以主机检查代替。
+两前端编译与最终镜像完整审计、主题 include 顺序、插件首项/语言、
+真实电池节点条件、单次 ADSP 启动、QSEE 固件路径兼容、fastbootd VINTF 检查均通过。
+本次仅设备树新增修改，未修改前端源码；未自动刷写或启动新镜像。
+此前 OTA 完整安装成功的用户确认不扩大为本次重新刷入验证。

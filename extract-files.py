@@ -222,6 +222,8 @@ def main():
                   'LOCAL_STRIP_MODULE := false', 'LOCAL_SYSTEM_SHARED_LIBRARIES :=',
                   'LOCAL_SHARED_LIBRARIES := ' + ' '.join(deps),
                   'include $(BUILD_PREBUILT)', '']
+    lines += ["# Android's module scan stops at this file, so load the device UI library here.",
+              'include $(LOCAL_PATH)/twrp-ui/Android.mk', '']
     (tree/'Android.mk').write_text('\n'.join(lines))
     continuation = ' ' + chr(92) + chr(10) + '    '
     modules = continuation.join(module_names[path] for path in elf_paths)

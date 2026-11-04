@@ -124,6 +124,7 @@ TW_CUSTOM_THEME := $(DEVICE_PATH)/generated/orangefox/ui.xml
 include $(DEVICE_PATH)/orangefox.mk
 else ifeq ($(SHENG_RECOVERY_FLAVOR),twrp)
 TW_DEVICE_VERSION := peiyuesheng_sheng
+TARGET_RECOVERY_TWRP_LIB := libsheng_twrp_ui
 # The panel's native DRM mode is 3048x2032. Use it directly for tablet UI;
 # do not apply the portrait frontend's 270-degree rotation to TWRP.
 TW_THEME := landscape_hdpi

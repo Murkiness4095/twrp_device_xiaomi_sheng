@@ -4,6 +4,7 @@
 Reads the selected frontend; never writes to bootable/recovery or vendor/twrp.
 """
 import argparse
+import copy
 import hashlib
 import json
 import re
@@ -38,8 +39,8 @@ def main():
         start = advanced.index('<page name="fox_modules">')
         end = advanced.index('</page>', start)
         page = advanced[start:end]
-        anchor = '<listitem name="{@module_of_set}">'
-        entry = '''<listitem name="{@disable_avb2=Disable vbmeta AVB2.0}">
+        anchor = '<listitem name="{@module_install} Magisk %magisk_ver%">'
+        entry = '''<listitem name="{@sheng_disable_avb=Disable AVB2.0}">
                     <icon res="build"/>
                     <action function="set">tw_back=fox_modules</action>
                     <action function="set">tw_action=disableAVB2</action>
@@ -54,24 +55,34 @@ def main():
         if page.count(anchor) != 1:
             raise RuntimeError('Unsupported OrangeFox Fox plugins list')
         page = page.replace(anchor, entry+anchor)
+        page = page.replace('<text>Magisk</text>', '<text>{@fox_modules_hdr}</text>')
+        page = page.replace('h="%bl_h2%"', 'h="%bl_h3%"')
+        page = page.replace('y="%row3_1a_y%"', 'y="%row4_1a_y%"')
+        page = page.replace('y="%row3_2a_y%"', 'y="%row4_2a_y%"')
         advanced = advanced[:start]+page+advanced[end:]
-        inner = advanced[advanced.index('<recovery>')+len('<recovery>'):advanced.rindex('</recovery>')]
-        # Keep all native pages/styles; override only the device-local copy of
-        # advanced.xml, with the button calling the existing native action.
+        # PageSet loads a document's pages BEFORE its includes. Keep advanced
+        # as an included document, after fonts/styles/images/templates.
         include = '<xml name="/twres/pages/advanced.xml"/>'
         if ui.count(include) != 1:
             raise RuntimeError('Unsupported OrangeFox advanced include')
-        ui = ui.replace(include, '')
-        ui = ui.replace('</recovery>', inner+'\n</recovery>')
+        ui = ui.replace(include, '<xml name="/twres/pages/sheng-advanced.xml"/>')
+        ui = ui.replace('name="magisk_ver" value="25.2"', 'name="magisk_ver" value="30.7"')
+        ET.fromstring(advanced)
+        (output/'advanced.xml').write_text('\n'.join(line.rstrip() for line in advanced.splitlines())+'\n')
         ET.fromstring(ui)
         (output/'ui.xml').write_text('\n'.join(line.rstrip() for line in ui.splitlines())+'\n')
         supplements = json.loads((tree/'tools/device-tools-orangefox-translations.json').read_text())
         files = list((recovery/'gui/theme/common/languages').glob('*.xml')) + list((recovery/'gui/theme/extra-languages/languages').glob('*.xml'))
         for path in files:
             text = path.read_text()
-            if 'name="auto_disable_avb2"' in text:
-                continue
-            strings = supplements[path.stem]
+            strings = supplements[path.stem] if 'name="auto_disable_avb2"' not in text else {}
+            language = ET.fromstring(text)
+            label = language.find("resources/string[@name='disable_avb2']")
+            title = label.text if label is not None else strings['disable_avb2']
+            title = re.sub(r'\s*vbmeta\s*', ' ', title, flags=re.I).strip()
+            if path.stem == 'zh_CN':
+                title = '禁用 AVB2.0'
+            strings = {**strings, 'sheng_disable_avb':title}
             extra = '\n'.join('        <string name="'+key+'">'+escape(value)+'</string>' for key,value in strings.items())
             text = text.replace('</resources>', extra+'\n\t</resources>')
             ET.fromstring(text)
@@ -93,8 +104,11 @@ def main():
                 <listitem name="{@sheng_disable_avb=Disable AVB 2.0 verification}">
                     <actions>
                         <action function="set">tw_back=advanced</action>
-                        <action function="set">tw_action=cmd</action>
-                        <action function="set">tw_action_param=/system/bin/sheng-avb --disable</action>
+                        <action function="set">tw_has_action2=0</action>
+                        <action function="set">tw_terminal_location=/</action>
+                        <action function="set">property.sys.sheng.avb.result=1</action>
+                        <action function="set">tw_action=terminalcommand</action>
+                        <action function="set">tw_action_param=/system/bin/sh /system/bin/sheng-avb-ui %tw_language%</action>
                         <action function="set">tw_text1={@sheng_disable_avb=Disable AVB 2.0 verification}</action>
                         <action function="set">tw_text2={@boot_slot_a=Slot A} + {@boot_slot_b=Slot B}: vbmeta + vbmeta_system</action>
                         <action function="set">tw_text3=</action>
@@ -102,7 +116,7 @@ def main():
                         <action function="set">tw_action_text1={@sheng_disable_avb=Disable AVB 2.0 verification}</action>
                         <action function="set">tw_complete_text1={@sheng_disable_avb=Disable AVB 2.0 verification}</action>
                         <action function="set">tw_slider_text={@swipe_to_confirm=Swipe to Confirm}</action>
-                        <action function="page">confirm_action</action>
+                        <action function="page">sheng_avb_confirm</action>
                     </actions>
                 </listitem>
                 <listitem name="{@install_btn=Install} Magisk 30.7">
@@ -139,9 +153,33 @@ def main():
         for section in sections[1:]:
             sections[0].extend(list(section))
             document.remove(section)
+    pages = document.find('pages')
+    confirm = copy.deepcopy(pages.find("page[@name='confirm_action']"))
+    confirm.set('name', 'sheng_avb_confirm')
+    confirm.find("slider/action[@function='page']").text = 'sheng_avb_action'
+    action = copy.deepcopy(pages.find("page[@name='action_page']"))
+    action.set('name', 'sheng_avb_action')
+    complete = action.find("action/condition[@var1='tw_operation_state']/../actions")
+    # Read the real exit result before entering the shared completion page.
+    status = ET.Element('action', {'function':'set'})
+    status.text = 'tw_operation_status=%property.sys.sheng.avb.result%'
+    complete.insert(0, status)
+    pages.extend((confirm, action))
     ET.indent(document, space='\t')
     (output/'ui.xml').write_text('<!-- Device-local customization of the pinned TeamWin theme; upstream notices retained. -->\n'+ET.tostring(document, encoding='unicode')+'\n')
     translations = json.loads((tree/'tools/device-tools-translations.json').read_text())
+    messages = json.loads((tree/'tools/device-avb-messages.json').read_text())
+    if set(messages) != set(translations):
+        raise RuntimeError('AVB console messages must cover every TWRP language')
+    header = ['// SPDX-License-Identifier: GPL-3.0-or-later',
+              '// Generated from the pinned OrangeFox messages and TeamWin status text.',
+              '#pragma once',
+              'struct AvbMessages { const char *language, *starting, *success, *failure, *complete, *failed; };',
+              'static constexpr AvbMessages avb_messages[] = {']
+    for name in ['en'] + sorted(set(messages)-{'en'}):
+        header.append('    {'+', '.join(json.dumps(s, ensure_ascii=False) for s in [name]+messages[name])+'},')
+    header.append('};')
+    (tree/'src/sheng_avb_messages.h').write_text('\n'.join(header)+'\n')
     languages = sorted((upstream/'common/languages').glob('*.xml')) + sorted((upstream/'extra-languages/languages').glob('*.xml'))
     if {p.stem for p in languages} != set(translations):
         raise RuntimeError('Every bundled language must have device tool translations')

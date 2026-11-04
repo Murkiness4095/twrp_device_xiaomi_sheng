@@ -16,7 +16,18 @@
 #include <cstring>
 #include <string>
 #include <unistd.h>
+#include "sheng_avb_messages.h"
 using std::string;
+
+static const AvbMessages* messages = &avb_messages[0];
+static void print_message(const char* text, const string& partition = "") {
+    string line = text;
+    size_t at = line.find("{1}");
+    if (at != string::npos) line.replace(at, 3, partition);
+    // Both success and failure go through the terminal's GUI output pipe.
+    fprintf(stdout, "%s\n", line.c_str());
+    fflush(stdout);
+}
 
 #define AVB_MAGIC "AVB0"
 #define AVB_MAGIC_LEN 4
@@ -61,8 +72,7 @@ exit:
         vbmetaFile = nullptr;
     }
     if (Display_Info)
-        fprintf(ret ? stdout : stderr, "Disable vbmeta AVB2.0: %s: %s\n",
-                File_Name.c_str(), ret ? "success" : "failed");
+        print_message(ret ? messages->success : messages->failure, File_Name);
     return ret;
 }
 
@@ -76,13 +86,27 @@ static bool Disable_AVB2(bool Display_Info) {
 
 int main(int argc, char** argv) {
 #ifdef SHENG_AVB_HOST_TEST
-    if (argc != 4 || strcmp(argv[1], "--disable") || strcmp(argv[2], "--device-dir")) return 2;
+    if ((argc != 4 && argc != 6) || strcmp(argv[1], "--disable") || strcmp(argv[2], "--device-dir")) return 2;
     test_directory = argv[3];
+    const int language_at = 4;
 #else
-    if (argc != 2 || strcmp(argv[1], "--disable")) {
-        fprintf(stderr, "usage: sheng-avb --disable\n");
+    if ((argc != 2 && argc != 4) || strcmp(argv[1], "--disable")) {
+        fprintf(stderr, "usage: sheng-avb --disable [--language CODE]\n");
         return 2;
     }
+    const int language_at = 2;
 #endif
-    return Disable_AVB2(true) ? 0 : 1;
+    if (argc > language_at) {
+        if (strcmp(argv[language_at], "--language")) return 2;
+        for (const auto& candidate : avb_messages) {
+            if (!strcmp(argv[language_at + 1], candidate.language)) {
+                messages = &candidate;
+                break;
+            }
+        }
+    }
+    print_message(messages->starting);
+    const bool result = Disable_AVB2(true);
+    print_message(result ? messages->complete : messages->failed);
+    return result ? 0 : 1;
 }

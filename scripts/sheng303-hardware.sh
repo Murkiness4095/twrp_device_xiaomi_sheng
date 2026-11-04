@@ -22,8 +22,14 @@ while read -r module; do
 done < /vendor/etc/sheng303/modules.order
 slot=$(getprop ro.boot.slot_suffix)
 case "$slot" in _a|_b) ;; *) echo "No valid slot suffix; firmware mount skipped"; exit 1 ;; esac
-mkdir -p /vendor/firmware_mnt
-mount -t vfat -o ro "/dev/block/by-name/modem$slot" /vendor/firmware_mnt || exit 1
+mkdir -p /firmware
+mount -t vfat -o ro "/dev/block/by-name/modem$slot" /firmware || exit 1
+# Recovery mounts and unmounts /vendor while enumerating partitions. Firmware
+# requests must keep a stable path across that work, including split segments.
+echo /firmware/image > /sys/module/firmware_class/parameters/path || exit 1
+for firmware in /firmware/image/adsp.mdt /firmware/image/adsp_dtb.mdt /firmware/image/adsp.b01; do
+    [ -r "$firmware" ] || { echo "ADSP firmware missing: $firmware"; exit 1; }
+done
 echo "Firmware mounted read-only for $slot"
 # This kernel exposes ADSP through remoteproc, not the older boot_adsp node.
 # Its PMIC GLINK services provide battery status, Type-C negotiation and OTG.
@@ -31,23 +37,12 @@ for remote in /sys/class/remoteproc/remoteproc*; do
     case "$(cat "$remote/name" 2>/dev/null)" in
         *remoteproc-adsp*)
             state=$(cat "$remote/state")
-            # Early firmware requests can transiently fail even though the
-            # mounted firmware becomes readable immediately afterwards. A
-            # single failed start left every power_supply node absent forever.
-            # Normal boots incur no sleep; retry only failed offline starts.
-            adsp_attempt=0
-            while [ "$state" = offline ] && [ "$adsp_attempt" -lt 5 ]; do
-                adsp_attempt=$((adsp_attempt + 1))
-                if echo start > "$remote/state"; then
-                    state=$(cat "$remote/state")
-                    break
-                fi
-                echo "ADSP start attempt $adsp_attempt failed"
-                state=$(cat "$remote/state")
-                if [ "$state" = offline ] && [ "$adsp_attempt" -lt 5 ]; then
-                    sleep 0.2
-                fi
-            done
+            # The stock driver can leave a GLINK device registered after a
+            # partial boot failure; retrying then fails with EEXIST. Start once
+            # only, after exposing all firmware through the stable root mount.
+            if [ "$state" = offline ]; then
+                echo start > "$remote/state" || echo "ADSP start failed; not retrying partial driver state"
+            fi
             echo "ADSP state: $(cat "$remote/state")"
             ;;
     esac

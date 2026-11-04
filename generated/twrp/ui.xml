@@ -3202,8 +3202,11 @@
 				<listitem name="{@sheng_disable_avb=Disable AVB 2.0 verification}">
 					<actions>
 						<action function="set">tw_back=advanced</action>
-						<action function="set">tw_action=cmd</action>
-						<action function="set">tw_action_param=/system/bin/sheng-avb --disable</action>
+						<action function="set">tw_has_action2=0</action>
+						<action function="set">tw_terminal_location=/</action>
+						<action function="set">property.sys.sheng.avb.result=1</action>
+						<action function="set">tw_action=terminalcommand</action>
+						<action function="set">tw_action_param=/system/bin/sh /system/bin/sheng-avb-ui %tw_language%</action>
 						<action function="set">tw_text1={@sheng_disable_avb=Disable AVB 2.0 verification}</action>
 						<action function="set">tw_text2={@boot_slot_a=Slot A} + {@boot_slot_b=Slot B}: vbmeta + vbmeta_system</action>
 						<action function="set">tw_text3=</action>
@@ -3211,7 +3214,7 @@
 						<action function="set">tw_action_text1={@sheng_disable_avb=Disable AVB 2.0 verification}</action>
 						<action function="set">tw_complete_text1={@sheng_disable_avb=Disable AVB 2.0 verification}</action>
 						<action function="set">tw_slider_text={@swipe_to_confirm=Swipe to Confirm}</action>
-						<action function="page">confirm_action</action>
+						<action function="page">sheng_avb_confirm</action>
 					</actions>
 				</listitem>
 				<listitem name="{@install_btn=Install} Magisk 30.7">
@@ -5262,6 +5265,91 @@ edi				<conditions>
 				<touch key="back" />
 				<actions>
 					<action function="page">main</action>
+				</actions>
+			</action>
+		</page>
+		<page name="sheng_avb_confirm">
+			<template name="page" />
+			<text style="text_l">
+				<placement x="%col1_x_header%" y="%row3_header_y%" />
+				<text>{@confirm_action=Confirm Action}</text>
+			</text>
+			<text style="text_m">
+				<placement x="%col1_x_header%" y="%row4_header_y%" />
+				<text />
+			</text>
+			<text style="text_m_accent">
+				<placement x="%center_x%" y="%row2_y%" placement="5" />
+				<text>%tw_text1%</text>
+			</text>
+			<text style="text_m_accent">
+				<placement x="%center_x%" y="%row3_y%" placement="5" />
+				<text>%tw_text2%</text>
+			</text>
+			<text style="text_m">
+				<placement x="%center_x%" y="%row4_y%" placement="5" />
+				<text>%tw_text3%</text>
+			</text>
+			<text style="text_m">
+				<placement x="%center_x%" y="%row5_y%" placement="5" />
+				<text>%tw_text4%</text>
+			</text>
+			<text style="text_m">
+				<placement x="%center_x%" y="%row7_y%" placement="5" />
+				<text>{@back_cancel=Press back button to cancel.}</text>
+			</text>
+			<slider style="slider_centered">
+				<text>%tw_slider_text%</text>
+				<action function="page">sheng_avb_action</action>
+			</slider>
+			<action>
+				<touch key="back" />
+				<actions>
+					<action function="set">tw_clear_destination=%tw_back%</action>
+					<action function="page">clear_vars</action>
+				</actions>
+			</action>
+			<action>
+				<touch key="home" />
+				<action function="page">main</action>
+			</action>
+		</page>
+		<page name="sheng_avb_action">
+			<template name="page" />
+			<text style="text_l">
+				<placement x="%col1_x_header%" y="%row3_header_y%" />
+				<text>%tw_action_text1%</text>
+			</text>
+			<text style="text_m">
+				<placement x="%col1_x_header%" y="%row4_header_y%" />
+				<text>%tw_action_text2%</text>
+			</text>
+			<template name="console" />
+			<template name="progress_bar" />
+			<button style="main_button_half_width">
+				<condition var1="tw_has_cancel" var2="1" />
+				<placement x="%col2_x_right%" y="%row15a_y%" />
+				<text>{@cancel_btn=Cancel}</text>
+				<action function="%tw_cancel_action%">%tw_cancel_param%</action>
+			</button>
+			<action>
+				<condition var1="tw_operation_state" var2="1" />
+				<actions>
+					<action function="set">tw_operation_status=%property.sys.sheng.avb.result%</action>
+					<action function="page">action_complete</action>
+				</actions>
+			</action>
+			<action>
+				<condition var1="tw_has_action2" var2="0" />
+				<actions>
+					<action function="%tw_action%">%tw_action_param%</action>
+				</actions>
+			</action>
+			<action>
+				<condition var1="tw_has_action2" var2="1" />
+				<actions>
+					<action function="%tw_action%">%tw_action_param%</action>
+					<action function="%tw_action2%">%tw_action2_param%</action>
 				</actions>
 			</action>
 		</page>

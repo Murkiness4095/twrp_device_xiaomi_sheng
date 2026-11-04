@@ -6864,3 +6864,6 @@ LOCAL_STRIP_MODULE := false
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
 LOCAL_SHARED_LIBRARIES := sheng303_vendor_lib64_sheng303_runtime_libtensorflowlite_touch_c_so sheng303_vendor_lib64_sheng303_runtime_libdl_so sheng303_vendor_lib64_sheng303_runtime_liblog_so sheng303_vendor_lib64_sheng303_runtime_libc_so sheng303_vendor_lib64_sheng303_runtime_libm_so
 include $(BUILD_PREBUILT)
+
+# Android's module scan stops at this file, so load the device UI library here.
+include $(LOCAL_PATH)/twrp-ui/Android.mk

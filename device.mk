@@ -30,7 +30,11 @@ PRODUCT_PACKAGES += snapuserd.recovery
 PRODUCT_COPY_FILES += \
     $(call find-copy-subdir-files,*,$(DEVICE_PATH)/generated/$(SHENG_RECOVERY_FLAVOR)/languages,recovery/root/system/etc/sheng-device-languages) \
     $(DEVICE_PATH)/generated/$(SHENG_RECOVERY_FLAVOR)/init.recovery.sheng-tools.rc:recovery/root/init.recovery.sheng-tools.rc
+ifeq ($(SHENG_RECOVERY_FLAVOR),orangefox)
+PRODUCT_COPY_FILES += $(DEVICE_PATH)/generated/orangefox/advanced.xml:recovery/root/twres/pages/sheng-advanced.xml
+endif
 ifeq ($(SHENG_RECOVERY_FLAVOR),twrp)
+PRODUCT_COPY_FILES += $(DEVICE_PATH)/scripts/sheng-avb-ui.sh:recovery/root/system/bin/sheng-avb-ui
 PRODUCT_PACKAGES += sheng-avb
 TARGET_RECOVERY_DEVICE_MODULES += sheng-avb
 RECOVERY_BINARY_SOURCE_FILES += $(TARGET_RECOVERY_ROOT_OUT)/system/bin/sheng-avb

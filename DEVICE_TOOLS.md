@@ -5,7 +5,7 @@
 
 ## TWRP
 
-- 在原有“高级”列表增加“禁用 AVB 2.0 验证”和“安装 Magisk 30.7”。
+- 在原有“高级”列表增加“禁用 AVB2.0”和“安装 Magisk 30.7”。
 - AVB 默认处理 A/B 两槽的 `vbmeta` 和 `vbmeta_system`，进入滑动确认页后才运行。
   `src/sheng_avb.cpp` 随设备树编译为 recovery 中的 `sheng-avb`。
   处理代码移植自固定版本 OrangeFox 的 `Do_Disable_AVB2` / `Disable_AVB2`：
@@ -40,8 +40,14 @@ TeamWin 上游权利及许可，不适用本树新辅助代码的 Apache-2.0 许
 第一阶段 init 已加载配套模块。旧硬件脚本逐项执行 tr/grep，338 项产生大量进程；
 现只读取一次 `/proc/modules`，使用 shell 内建匹配，仍加载任何缺少的模块。
 电池节点等待间隔从 1 秒改为 0.1 秒，最长仍为 10 秒，不伪造电池状态或绕过 Health。
-ADSP 因早期固件加载失败而保持 offline 时，最多启动五次，失败之间间隔 0.2 秒；
-首次成功不增加等待。电池节点仍不存在时不发布 hardware.ready，避免误报就绪。
+modem 固件只读挂载到独立的 `/firmware`，内核固件搜索路径设为 `/firmware/image`，
+避免 Recovery 挂卸 `/vendor` 时遮蔽其子目录中的固件。ADSP 只启动一次；
+1915 版的五次重试已撤回，实机显示部分启动失败后重试会因 GLINK 重复注册返回 -17。
+电池节点仍不存在时不发布 hardware.ready，避免误报就绪。1940 实机冷启动已确认
+ADSP running、电池 capacity=100、Health 服务运行；但旧 QSEE 启动器仍等旧路径，
+导致解密初始化卡 Logo。RAM 中将 `/vendor/firmware_mnt` 链接到 `/firmware` 后，
+密钥服务恢复，用户确认进入界面。启动器现等待独立挂载的实际固件文件，并在
+启动 QSEE 前创建兼容链接，保留官方库的旧路径；完整新镜像仍待冷启动测试。
 实机只读对比为旧循环 4.88 秒、新循环 0.081 秒，均确认没有缺少模块。
 这是模块检查的计时，不等于完整 USB 枚举耗时。
 
@@ -72,6 +78,20 @@ against temporary image files. It compares final bytes and return values for
 normal, already-disabled, malformed, missing and short targets, including the
 upstream partial-failure behavior. Host tests never write physical partitions.
 Actual AVB disabling and Magisk installation require separate device testing.
+
+TWRP 的手动 AVB 操作使用原生 terminalcommand 将开始、逐分区成功/失败和汇总
+输出到屏幕日志（23 种语言）。原生 cmd 的 stdout 只进入 recovery.log，原生
+terminalcommand 又固定报告状态 0；因此树内 sheng-avb-ui 将真实退出结果发布到
+sys.sheng.avb.result，专用动作页在进入原生 action_complete 前读取该结果。
+滑动确认与原生 A/B 四目标写入规则保留，失败时不显示成功。
+verify_avb_console.py 提取真实 TWRP terminalcommand 方法，在临时文件上验证日志
+输出与成功、部分失败、工具缺失状态；不写物理分区，不能代替实机屏幕测试。
+
+TWRP 的终端动作会额外回显 `/ # /system/bin/sh ... zh_CN`。树内 twrp-ui
+通过原生 TARGET_RECOVERY_TWRP_LIB 接口保留原始 BasePartition 工厂，并仅在
+recovery 的链接目标包装 gui_print：该 AVB 包装器的命令行保留于 recovery.log，
+不进入 GUI 控制台。其他终端命令和全部处理/错误日志照常显示，不修改前端源码。
+控制台回归同时检查 AVB 六行结果、无命令回显、普通终端回显不受影响。
 
 The port preserves the TeamWin / OrangeFox attribution and GPL-3.0-or-later
 license. See `src/ORANGEFOX-NOTICE`.
